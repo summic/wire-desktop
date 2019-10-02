@@ -19,6 +19,7 @@
 
 const environment = require('../../dist/runtime/EnvironmentUtil');
 const {EVENT_TYPE} = require('../../dist/lib/eventType');
+const {SpellCheckHandler, ContextMenuListener, ContextMenuBuilder} = require('electron-spellchecker');
 
 const {ipcRenderer, remote, webFrame} = require('electron');
 const {systemPreferences} = remote;
@@ -174,5 +175,18 @@ window.addEventListener('DOMContentLoaded', () => {
     reportWebappVersion();
     // include context menu
     require('../../dist/renderer/menu/context');
+
+    window.spellCheckHandler = new SpellCheckHandler();
+    window.spellCheckHandler.switchLanguage('en-US');
+
+    window.spellCheckHandler.provideHintText('This is probably the language that you want to check in');
+    window.spellCheckHandler.autoUnloadDictionariesOnBlur();
+
+    window.contextMenuBuilder = new ContextMenuBuilder(window.spellCheckHandler, null, true);
+    window.contextMenuListener = new ContextMenuListener(info => {
+      window.contextMenuBuilder.showPopupMenu(info);
+    });
+
+    window.spellCheckHandler.attachToInput();
   });
 });
